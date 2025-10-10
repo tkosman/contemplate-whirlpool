@@ -1,0 +1,15 @@
+FROM python:3.12-slim
+
+# Set working directory
+WORKDIR /app
+# Copy requirements if exists, else install sanic directly
+RUN pip install sanic
+
+# Copy application code
+COPY backend/app.py /app/app.py
+
+# Expose the port Sanic runs on
+EXPOSE 1234
+
+# Run the application
+CMD ["python", "-m", "app"]
