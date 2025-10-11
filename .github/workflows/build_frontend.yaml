@@ -1,12 +1,12 @@
-name: Build and Push Docker Image
+name: Build and Push Frontend Docker Image
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'frontend-v*'
 
 jobs:
-  build:
+  build-frontend:
     runs-on: ubuntu-latest
     environment: Secrets
     steps:
@@ -24,14 +24,14 @@ jobs:
 
       - name: Extract version from tag
         id: vars
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+        run: echo "VERSION=${GITHUB_REF#refs/tags/frontend-v}" >> $GITHUB_OUTPUT
 
-      - name: Build and push Docker image
+      - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.backend
+          file: ./Dockerfile.frontend
           push: true
           tags: |
-            tymoteusz4development/contemplate-whirlpool:${{ env.VERSION }}
-            tymoteusz4development/contemplate-whirlpool:latest
+            tymoteusz4development/contemplate-whirlpool-frontend:${{ steps.vars.outputs.VERSION }}
+            tymoteusz4development/contemplate-whirlpool-frontend:latest

@@ -1,0 +1,20 @@
+
+
+FROM nginx:alpine
+
+# Replace default nginx config with our proxy config which listens on 1111
+RUN apk add --no-cache gettext
+
+COPY frontend/nginx.conf /etc/nginx/templates/default.conf.template
+
+# Entrypoint which substitutes BACKEND_HOST into the template
+COPY frontend/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+COPY frontend/index.html /usr/share/nginx/html/index.html
+
+EXPOSE 1111
+
+ENV BACKEND_HOST=host.docker.internal
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
