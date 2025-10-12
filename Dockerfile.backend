@@ -2,8 +2,9 @@ FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
-# Copy requirements if exists, else install sanic directly
-RUN pip install sanic
+
+COPY backend/requirements.txt /app/requirements.txt
+RUN pip install -r requirements.txt
 
 # Copy application code
 COPY backend/app.py /app/app.py
