@@ -12,7 +12,7 @@ hello_world_counter = Counter(
 @app.get("/")
 async def hello_world(request):
     hello_world_counter.inc()
-    return sanic.response.text("Hello, World! v1.0.1")
+    return sanic.response.text("Hello, World! v1.0.2")
 
 
 @app.get("/prometheus")
