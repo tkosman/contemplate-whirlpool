@@ -57,7 +57,7 @@
   onMount(() => {
     connectWebSocket();
   });
-  
+   
   onDestroy(() => {
     if (ws) {
       ws.close();
