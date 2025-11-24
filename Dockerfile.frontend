@@ -1,5 +1,23 @@
 
 
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY frontend/svelte-app/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source files
+COPY frontend/svelte-app/ ./
+
+# Build the app
+RUN npm run build
+
+# Production stage
 FROM nginx:alpine
 
 # Replace default nginx config with our proxy config which listens on 1111
@@ -11,7 +29,8 @@ COPY frontend/nginx.conf /etc/nginx/templates/default.conf.template
 COPY frontend/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-COPY frontend/index.html /usr/share/nginx/html/index.html
+# Copy built Svelte app from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 1111
 
