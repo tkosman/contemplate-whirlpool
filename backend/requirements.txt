@@ -2,3 +2,4 @@ sanic
 prometheus-client
 requests
 aiohttp
+spacy

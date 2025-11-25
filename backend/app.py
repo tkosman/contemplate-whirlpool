@@ -5,7 +5,7 @@ from prometheus_client import Counter, CollectorRegistry, generate_latest
 from prometheus_client import CONTENT_TYPE_LATEST
 from sanic import Request, Websocket
 
-from cave import Cave, Thinker, WikipediaThinker, NYTThinker, RedditThinker, GuardianThinker, GoogleSearchThinker
+from cave import Cave, Thinker, WikipediaThinker, NYTThinker, RedditThinker, GuardianThinker, GoogleSearchThinker, LOCThinker
 
 
 app = sanic.Sanic("ContemplateWhirlpool")
@@ -22,6 +22,7 @@ hello_world_counter = Counter(
 async def setup_cave(app, loop):
     app.ctx.cave = Cave()
     app.ctx.cave.add_thinker(WikipediaThinker("WikipediaThinker"))
+    app.ctx.cave.add_thinker(LOCThinker("LOCThinker"))
     app.add_task(app.ctx.cave.contemplate())
 
 

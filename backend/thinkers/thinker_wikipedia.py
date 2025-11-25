@@ -4,15 +4,24 @@ from pathlib import Path
 backend_path = Path(__file__).resolve().parent.parent
 sys.path.append(str(backend_path))
 
-from Thinker import Thinker
+from thinker import Thinker
 import aiohttp
 import re
 from urllib.parse import quote
 import logging
+import spacy
+import random
 
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# Load spaCy model for noun extraction
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    logger.warning("spaCy model 'en_core_web_sm' not found. Install it with: python -m spacy download en_core_web_sm")
+    nlp = None
 
 
 class WikipediaThinker(Thinker):
@@ -79,7 +88,10 @@ class WikipediaThinker(Thinker):
 
             if not title:
                 logger.debug("No title found for the query.")
-                return ""
+                common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+                result = random.choice(common_nouns)
+                logger.debug(f"Generated random noun: {result}")
+                return result
 
             # 4) Get page summary (first paragraph / extract)
             summary_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{quote(title, safe='')}"
@@ -118,6 +130,10 @@ class WikipediaThinker(Thinker):
 
             if not extract:
                 logger.debug("No extract found for the title.")
+                common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+                result = random.choice(common_nouns)
+                logger.debug(f"Generated random noun: {result}")
+                return result
                 return ""
 
             # 5) Get the first sentence
@@ -125,35 +141,80 @@ class WikipediaThinker(Thinker):
             sentences = re.split(r"(?<=[.!?])\s+", extract)
             first_sentence = sentences[0].strip() if sentences else extract
 
-            # 6) Heuristic noun extraction from first sentence:
+            # 6) Use spaCy for noun extraction if available
+            if nlp:
+                doc = nlp(first_sentence)
+                candidates = []
+
+                # First, collect proper nouns (PROPN)
+                for token in doc:
+                    if token.pos_ == "PROPN" and token.text.lower() != thought.lower():
+                        candidates.append(token.text)
+
+                # Next, collect named entities
+                for ent in doc.ents:
+                    if ent.text.lower() != thought.lower():
+                        candidates.append(ent.text)
+
+                # Fallback: collect any noun longer than 2 characters
+                if not candidates:
+                    for token in doc:
+                        if token.pos_ in ["NOUN", "PROPN"] and len(token.text) > 2 and token.text.lower() != thought.lower():
+                            candidates.append(token.text)
+
+                # Return random candidate if any found
+                if candidates:
+                    result = random.choice(candidates)
+                    logger.debug(f"Extracted noun (spaCy): {result} from {len(candidates)} candidates")
+                    return result
+
+            # 7) Fallback to regex-based extraction if spaCy not available
             tokens = re.findall(r"[A-Za-z][A-Za-z'-]*", first_sentence)
             articles = {"the", "a", "an", "this", "that", "these", "those"}
-            for i, tok in enumerate(tokens):
-                if tok.lower() in articles:
-                    continue
-                if tok[0].isupper():
+            candidates = []
+
+            # Look for capitalized words (proper nouns)
+            i = 0
+            while i < len(tokens):
+                tok = tokens[i]
+                if tok.lower() not in articles and tok[0].isupper():
                     name = tok
                     j = i + 1
                     while j < len(tokens) and tokens[j][0].isupper():
                         name += " " + tokens[j]
                         j += 1
                     if name.lower() != thought.lower():
-                        logger.debug(f"Extracted proper noun: {name}")
-                        return name
+                        candidates.append(name)
+                    i = j
+                else:
+                    i += 1
 
-            # fallback: first non-article token longer than 2
-            for tok in tokens:
-                if tok.lower() in articles:
-                    continue
-                if len(tok) > 2 and tok.lower() != thought.lower():
-                    logger.debug(f"Fallback token: {tok}")
-                    return tok
+            # fallback: collect non-article tokens longer than 2
+            if not candidates:
+                for tok in tokens:
+                    if tok.lower() not in articles and len(tok) > 2 and tok.lower() != thought.lower():
+                        candidates.append(tok)
+
+            # Return random candidate if any found
+            if candidates:
+                result = random.choice(candidates)
+                logger.debug(f"Extracted noun (regex): {result} from {len(candidates)} candidates")
+                return result
 
             # last resort: use the first token from the page title
             title_tokens = re.findall(r"[A-Za-z][A-Za-z'-]*", title)
-            fallback_title = title_tokens[0] if title_tokens and title_tokens[0].lower() != thought.lower() else ""
-            logger.debug(f"Fallback title token: {fallback_title}")
-            return fallback_title
+            if title_tokens and title_tokens[0].lower() != thought.lower():
+                logger.debug(f"Fallback title token: {title_tokens[0]}")
+                return title_tokens[0]
+
+            # ultimate fallback: generate a random common noun
+            if nlp:
+                common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+                result = random.choice(common_nouns)
+                logger.debug(f"Generated random noun: {result}")
+                return result
+
+            return ""
 
 
 if __name__ == "__main__":

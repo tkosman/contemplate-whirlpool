@@ -7,6 +7,7 @@ sys.path.append(str(backend_path))
 from thinker import Thinker
 import aiohttp
 import re
+from urllib.parse import quote
 import logging
 import spacy
 import random
@@ -23,7 +24,7 @@ except OSError:
     nlp = None
 
 
-class GoogleSearchThinker(Thinker):
+class LOCThinker(Thinker):
     async def think(self, thought: str) -> str:
         logger.debug(f"Received thought: {thought}")
         if not thought or not thought.strip():
@@ -31,19 +32,19 @@ class GoogleSearchThinker(Thinker):
             return ""
 
         query = thought.strip()
-        api_key = "your-serpapi-key"
-        search_api = "https://serpapi.com/search"
+        search_api = "https://www.loc.gov/search/"
         session_timeout = aiohttp.ClientTimeout(total=10)
 
         headers = {
-            "User-Agent": "GoogleSearchThinker/1.0 (https://github.com/your-repo)"
+            "User-Agent": "LOCThinker/1.0 (https://github.com/your-repo)"
         }
 
         async with aiohttp.ClientSession(headers=headers) as session:
-            # 1) Search for relevant results
+            # 1) Search for relevant items
             params = {
                 "q": query,
-                "api_key": api_key
+                "fo": "json",
+                "c": 10
             }
             try:
                 async with session.get(search_api, params=params, timeout=session_timeout) as resp:
@@ -53,7 +54,7 @@ class GoogleSearchThinker(Thinker):
                 logger.error(f"Error during search API call: {e}")
                 return ""
 
-            results = search_json.get("organic_results", [])
+            results = search_json.get("results", [])
             title = None
             qlower = query.lower()
 
@@ -70,17 +71,30 @@ class GoogleSearchThinker(Thinker):
 
             if not title:
                 logger.debug("No title found for the query.")
-                return ""
+                common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+                result = random.choice(common_nouns)
+                logger.debug(f"Generated random noun: {result}")
+                return result
 
-            # 3) Get snippet content
-            result = results[0] if results else {}
-            snippet = result.get("snippet", "")
+            # 3) Get item content (description or summary)
+            item = results[0] if results else {}
+            description = item.get("description", [])
 
-            extract = snippet or title
+            # Description can be a list, join if necessary
+            if isinstance(description, list):
+                extract = " ".join(description)
+            else:
+                extract = description or ""
+
+            # Fallback to title if no description
+            extract = extract or title
 
             if not extract:
-                logger.debug("No extract found for the result.")
-                return ""
+                logger.debug("No extract found for the item.")
+                common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+                result = random.choice(common_nouns)
+                logger.debug(f"Generated random noun: {result}")
+                return result
 
             # 4) Get the first sentence
             extract = re.sub(r"\s+", " ", extract).strip()
@@ -112,7 +126,9 @@ class GoogleSearchThinker(Thinker):
                 if candidates:
                     result = random.choice(candidates)
                     logger.debug(f"Extracted noun (spaCy): {result} from {len(candidates)} candidates")
-                    return result            # 6) Fallback to regex-based extraction if spaCy not available
+                    return result
+
+            # 6) Fallback to regex-based extraction if spaCy not available
             tokens = re.findall(r"[A-Za-z][A-Za-z'-]*", first_sentence)
             articles = {"the", "a", "an", "this", "that", "these", "those"}
             candidates = []
@@ -143,7 +159,9 @@ class GoogleSearchThinker(Thinker):
             if candidates:
                 result = random.choice(candidates)
                 logger.debug(f"Extracted noun (regex): {result} from {len(candidates)} candidates")
-                return result            # last resort: use the first token from the title
+                return result
+
+            # last resort: use the first token from the title
             title_tokens = re.findall(r"[A-Za-z][A-Za-z'-]*", title)
             if title_tokens and title_tokens[0].lower() != thought.lower():
                 logger.debug(f"Fallback title token: {title_tokens[0]}")
@@ -163,10 +181,10 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
-        thinker = GoogleSearchThinker("GoogleSearchThinker")
+        thinker = LOCThinker("LOCThinker")
 
         # Test with a valid thought
-        thought = "Python programming"
+        thought = "Abraham Lincoln"
         result = await thinker.think(thought)
         print(f"Input: {thought}\nOutput: {result}\n")
 

@@ -1,4 +1,4 @@
-from Thinker import Thinker
+from thinker import Thinker
 import aiohttp
 import logging
 import re
