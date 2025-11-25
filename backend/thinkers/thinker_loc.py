@@ -22,7 +22,10 @@ class LOCThinker(Thinker):
         logger.debug(f"Received thought: {thought}")
         if not thought or not thought.strip():
             logger.debug("Empty or invalid thought provided.")
-            return ""
+            common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+            result = random.choice(common_nouns)
+            logger.debug(f"Generated random noun: {result}")
+            return result
 
         query = thought.strip()
         search_api = "https://www.loc.gov/search/"
