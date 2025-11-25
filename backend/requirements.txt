@@ -1,2 +1,4 @@
 sanic
 prometheus-client
+requests
+aiohttp

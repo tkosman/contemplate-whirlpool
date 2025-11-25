@@ -1,3 +1,5 @@
 /backend/__pycache__
 myenv/
 frontend/svelte-app/node_modules/
+.vscode
+backend/thinkers/__pycache__

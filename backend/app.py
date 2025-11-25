@@ -1,8 +1,12 @@
 import sanic
 import asyncio
+from sanic.log import logger
 from prometheus_client import Counter, CollectorRegistry, generate_latest
 from prometheus_client import CONTENT_TYPE_LATEST
 from sanic import Request, Websocket
+
+from cave import Cave, Thinker, WikipediaThinker, NYTThinker, RedditThinker, GuardianThinker, GoogleSearchThinker
+
 
 app = sanic.Sanic("ContemplateWhirlpool")
 
@@ -13,6 +17,13 @@ hello_world_counter = Counter(
     'hello_world_requests_total',
     'Total number of requests to hello_world endpoint'
 )
+
+@app.before_server_start
+async def setup_cave(app, loop):
+    app.ctx.cave = Cave()
+    app.ctx.cave.add_thinker(WikipediaThinker("WikipediaThinker"))
+    app.add_task(app.ctx.cave.contemplate())
+
 
 @app.get("/")
 async def hello_world(request):
@@ -33,12 +44,23 @@ async def prometheus_metrics(request):
 
 @app.websocket("/ws")
 async def feed(request: Request, ws: Websocket):
-    i = 0
-    while True:
-        i += 1
-        print("Sending: " + str(i))
-        await ws.send(str(i))
-        await asyncio.sleep(1)
+    try:
+        app.ctx.cave.wcs.append(ws)
+        last_thought_1 = ""
+        last_thought_2 = ""
+        while True:
+            while last_thought_1 == last_thought_2:
+                await asyncio.sleep(0.1)
+                async with app.ctx.cave.get_thought() as thought:
+                    last_thought_1 = thought
+            await ws.send(last_thought_1)
+            last_thought_2 = last_thought_1
+    except Exception:
+        logger.warning(f"WebSocket error with: {ws}")
+    finally:
+        logger.info(f"WebSocket disconnected: {ws}")
+        app.ctx.cave.wcs.remove(ws)
+
 
 
 if __name__ == "__main__":
