@@ -7,10 +7,6 @@ import random
 from sanic import Websocket
 from thinker import Thinker
 from thinkers.thinker_wikipedia import WikipediaThinker
-from thinkers.thinker_nyt import NYTThinker
-from thinkers.thinker_reddit import RedditThinker
-from thinkers.thinker_guardian import GuardianThinker
-from thinkers.thinker_google import GoogleSearchThinker
 from thinkers.thinker_loc import LOCThinker
 
 

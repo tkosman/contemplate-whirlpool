@@ -5,7 +5,7 @@ from prometheus_client import Counter, CollectorRegistry, generate_latest
 from prometheus_client import CONTENT_TYPE_LATEST
 from sanic import Request, Websocket
 
-from cave import Cave, Thinker, WikipediaThinker, NYTThinker, RedditThinker, GuardianThinker, GoogleSearchThinker, LOCThinker
+from cave import Cave, WikipediaThinker, LOCThinker
 
 
 app = sanic.Sanic("ContemplateWhirlpool")

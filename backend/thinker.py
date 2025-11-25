@@ -1,9 +1,14 @@
 
 from abc import ABC, abstractmethod
+import spacy
 
 
 class Thinker(ABC):
     def __init__(self, name: str):
+        try:
+            self.nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            self.nlp = None
         self.__name = name
         self.__current_thought = ""
         self.__next_thought = ""

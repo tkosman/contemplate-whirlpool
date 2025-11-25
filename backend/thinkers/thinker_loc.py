@@ -16,13 +16,6 @@ import random
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Load spaCy model for noun extraction
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    logger.warning("spaCy model 'en_core_web_sm' not found. Install it with: python -m spacy download en_core_web_sm")
-    nlp = None
-
 
 class LOCThinker(Thinker):
     async def think(self, thought: str) -> str:
@@ -102,24 +95,24 @@ class LOCThinker(Thinker):
             first_sentence = sentences[0].strip() if sentences else extract
 
             # 5) Use spaCy for noun extraction if available
-            if nlp:
-                doc = nlp(first_sentence)
+            if self.nlp:
+                doc = self.nlp(first_sentence)
                 candidates = []
 
                 # First, collect proper nouns (PROPN)
                 for token in doc:
-                    if token.pos_ == "PROPN" and token.text.lower() != thought.lower():
+                    if token.pos_ == "PROPN" and token.text.lower() != thought.lower() and not token.text.isdigit() and token.text.isalpha():
                         candidates.append(token.text)
 
                 # Next, collect named entities
                 for ent in doc.ents:
-                    if ent.text.lower() != thought.lower():
+                    if ent.text.lower() != thought.lower() and not ent.text.isdigit() and any(c.isalpha() for c in ent.text):
                         candidates.append(ent.text)
 
                 # Fallback: collect any noun longer than 2 characters
                 if not candidates:
                     for token in doc:
-                        if token.pos_ in ["NOUN", "PROPN"] and len(token.text) > 2 and token.text.lower() != thought.lower():
+                        if token.pos_ in ["NOUN", "PROPN"] and len(token.text) > 2 and token.text.lower() != thought.lower() and not token.text.isdigit() and token.text.isalpha():
                             candidates.append(token.text)
 
                 # Return random candidate if any found
@@ -137,10 +130,10 @@ class LOCThinker(Thinker):
             i = 0
             while i < len(tokens):
                 tok = tokens[i]
-                if tok.lower() not in articles and tok[0].isupper():
+                if tok.lower() not in articles and tok[0].isupper() and tok.isalpha():
                     name = tok
                     j = i + 1
-                    while j < len(tokens) and tokens[j][0].isupper():
+                    while j < len(tokens) and tokens[j][0].isupper() and tokens[j].isalpha():
                         name += " " + tokens[j]
                         j += 1
                     if name.lower() != thought.lower():
@@ -152,7 +145,7 @@ class LOCThinker(Thinker):
             # fallback: collect non-article tokens longer than 2
             if not candidates:
                 for tok in tokens:
-                    if tok.lower() not in articles and len(tok) > 2 and tok.lower() != thought.lower():
+                    if tok.lower() not in articles and len(tok) > 2 and tok.lower() != thought.lower() and tok.isalpha():
                         candidates.append(tok)
 
             # Return random candidate if any found
@@ -168,7 +161,7 @@ class LOCThinker(Thinker):
                 return title_tokens[0]
 
             # ultimate fallback: generate a random common noun
-            if nlp:
+            if self.nlp:
                 common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
                 result = random.choice(common_nouns)
                 logger.debug(f"Generated random noun: {result}")
