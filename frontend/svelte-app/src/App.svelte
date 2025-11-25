@@ -35,8 +35,13 @@
     };
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      addMessage(data.thought, 'message', data.thinker);
+      try {
+        const data = JSON.parse(event.data);
+        addMessage(data.thought, 'message', data.thinker || 'Unknown');
+      } catch (e) {
+        // Fallback for non-JSON messages
+        addMessage(event.data, 'message', null);
+      }
       console.log('Received:', event.data);
     };
 
@@ -193,7 +198,7 @@
     border-radius: 6px;
     display: flex;
     gap: 1em;
-    align-items: baseline;
+    align-items: center;
     animation: slideIn 0.2s ease-out;
   }
 
@@ -216,6 +221,7 @@
     color: #666;
     font-family: monospace;
     white-space: nowrap;
+    min-width: 80px;
   }
 
   .thinker {
@@ -226,6 +232,8 @@
     padding: 0.2em 0.6em;
     background-color: rgba(255, 62, 0, 0.1);
     border-radius: 4px;
+    min-width: 150px;
+    text-align: center;
   }
 
   .text {
