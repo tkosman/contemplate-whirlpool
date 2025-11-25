@@ -46,15 +46,13 @@ async def prometheus_metrics(request):
 async def feed(request: Request, ws: Websocket):
     try:
         app.ctx.cave.wcs.append(ws)
-        last_thought_1 = ""
-        last_thought_2 = ""
+        last_thought = ""
         while True:
-            while last_thought_1 == last_thought_2:
-                await asyncio.sleep(0.1)
-                async with app.ctx.cave.get_thought() as thought:
-                    last_thought_1 = thought
-            await ws.send(last_thought_1)
-            last_thought_2 = last_thought_1
+            async with app.ctx.cave.get_thought() as thought:
+                if thought != last_thought:
+                    await ws.send(thought)
+                    last_thought = thought
+            await asyncio.sleep(0.5)
     except Exception:
         logger.warning(f"WebSocket error with: {ws}")
     finally:

@@ -220,6 +220,13 @@
     font-size: 1em;
   }
 
+  .version {
+    margin-top: 1.5em;
+    text-align: center;
+    color: white;
+    font-size: 0.9em;
+  }
+
   @keyframes slideIn {
     from {
       opacity: 0;
