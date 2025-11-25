@@ -35,7 +35,8 @@
     };
 
     ws.onmessage = (event) => {
-      addMessage(event.data, 'message');
+      const data = JSON.parse(event.data);
+      addMessage(data.thought, 'message', data.thinker);
       console.log('Received:', event.data);
     };
 
@@ -57,9 +58,9 @@
     };
   }
 
-  function addMessage(text, type = 'message') {
+  function addMessage(text, type = 'message', thinker = null) {
     const timestamp = new Date().toLocaleTimeString();
-    messages = [...messages, { text, type, timestamp, id: Date.now() }];
+    messages = [...messages, { text, type, timestamp, thinker, id: Date.now() }];
   }
 
   function clearMessages() {
@@ -100,6 +101,9 @@
       {#each messages as msg (msg.id)}
         <div class="message {msg.type}">
           <span class="timestamp">{msg.timestamp}</span>
+          {#if msg.thinker}
+            <span class="thinker">{msg.thinker}</span>
+          {/if}
           <span class="text">{msg.text}</span>
         </div>
       {/each}
@@ -214,6 +218,16 @@
     white-space: nowrap;
   }
 
+  .thinker {
+    font-size: 0.85em;
+    color: #ff3e00;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 0.2em 0.6em;
+    background-color: rgba(255, 62, 0, 0.1);
+    border-radius: 4px;
+  }
+
   .text {
     flex: 1;
     word-wrap: break-word;
@@ -259,6 +273,11 @@
 
     .timestamp {
       color: #999;
+    }
+
+    .thinker {
+      color: #ff8866;
+      background-color: rgba(255, 136, 102, 0.2);
     }
   }
 </style>
