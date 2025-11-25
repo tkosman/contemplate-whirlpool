@@ -51,7 +51,10 @@ class WikipediaThinker(Thinker):
                     logger.debug(f"Search API response: {search_json}")
             except Exception as e:
                 logger.error(f"Error during search API call: {e}")
-                return ""
+                common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+                result = random.choice(common_nouns)
+                logger.debug(f"Generated random noun: {result}")
+                return result
 
             results = search_json.get("query", {}).get("search", [])
             title = None
@@ -209,7 +212,7 @@ class WikipediaThinker(Thinker):
                 logger.debug(f"Generated random noun: {result}")
                 return result
 
-            return ""
+            return "none"
 
 
 if __name__ == "__main__":
