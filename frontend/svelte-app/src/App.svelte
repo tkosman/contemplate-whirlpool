@@ -68,10 +68,6 @@
     messages = [...messages, { text, type, timestamp, thinker, id: Date.now() }];
   }
 
-  function clearMessages() {
-    messages = [];
-  }
-
   // Auto-scroll to bottom when new messages arrive
   afterUpdate(() => {
     if (messageContainer) {
@@ -97,7 +93,6 @@
       <span class="indicator" class:connected={connected}></span>
       {connected ? 'Connected' : 'Disconnected'}
     </div>
-    <button on:click={clearMessages}>Clear</button>
   </div>
   <div class="message-box" bind:this={messageContainer}>
     {#if messages.length === 0}
@@ -134,7 +129,7 @@
   .header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     margin-bottom: 1em;
   }
 
@@ -156,21 +151,6 @@
 
   .indicator.connected {
     background-color: #22c55e;
-  }
-
-  button {
-    padding: 0.5em 1em;
-    background-color: #ff3e00;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s;
-  }
-
-  button:hover {
-    background-color: #e63900;
   }
 
   .message-box {
@@ -257,6 +237,76 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  /* Mobile responsive styles */
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 0.5em;
+    }
+
+    .header {
+      flex-wrap: wrap;
+      gap: 0.5em;
+    }
+
+    .status {
+      font-size: 1em;
+    }
+
+    .message-box {
+      height: calc(100vh - 250px);
+      min-height: 300px;
+      padding: 0.75em;
+      border-width: 2px;
+    }
+
+    .message {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5em;
+      padding: 0.75em;
+    }
+
+    .timestamp {
+      min-width: auto;
+      font-size: 0.75em;
+    }
+
+    .thinker {
+      min-width: auto;
+      font-size: 0.75em;
+      padding: 0.25em 0.5em;
+    }
+
+    .text {
+      font-size: 0.95em;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    main {
+      padding: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.5em;
+    }
+
+    .message-box {
+      height: calc(100vh - 200px);
+      padding: 0.5em;
+    }
+
+    .header {
+      padding: 0.5em;
     }
   }
 
