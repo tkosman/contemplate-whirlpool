@@ -93,6 +93,9 @@
       <span class="indicator" class:connected={connected}></span>
       {connected ? 'Connected' : 'Disconnected'}
     </div>
+    <a href="https://www.buymeacoffee.com/tymoteusz4development" target="_blank" class="bmc-link">
+      <img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" class="bmc-button" />
+    </a>
   </div>
   <div class="message-box" bind:this={messageContainer}>
     {#if messages.length === 0}
@@ -129,8 +132,9 @@
   .header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     margin-bottom: 1em;
+    gap: 1em;
   }
 
   .status {
@@ -229,6 +233,21 @@
     font-size: 0.9em;
   }
 
+  .bmc-link {
+    display: flex;
+    align-items: center;
+  }
+
+  .bmc-button {
+    height: 40px;
+    width: auto;
+    transition: transform 0.2s ease;
+  }
+
+  .bmc-button:hover {
+    transform: scale(1.05);
+  }
+
   @keyframes slideIn {
     from {
       opacity: 0;
@@ -252,12 +271,16 @@
     }
 
     .header {
-      flex-wrap: wrap;
-      gap: 0.5em;
+      flex-direction: column;
+      gap: 0.75em;
     }
 
     .status {
       font-size: 1em;
+    }
+
+    .bmc-button {
+      height: 35px;
     }
 
     .message-box {
