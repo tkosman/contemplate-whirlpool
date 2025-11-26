@@ -262,32 +262,39 @@
   /* Mobile responsive styles */
   @media (max-width: 768px) {
     main {
-      padding: 1rem;
+      padding: 0.5rem;
+      max-width: 100%;
     }
 
     h1 {
-      font-size: 1.8em;
-      margin-bottom: 0.5em;
+      font-size: 1.6em;
+      margin-bottom: 0.3em;
     }
 
     .header {
       flex-direction: column;
-      gap: 0.75em;
+      gap: 0.5em;
+      margin-bottom: 0.75em;
     }
 
     .status {
-      font-size: 1em;
+      font-size: 0.95em;
     }
 
     .bmc-button {
-      height: 35px;
+      height: 32px;
     }
 
     .message-box {
-      height: calc(100vh - 250px);
-      min-height: 300px;
-      padding: 0.75em;
+      height: calc(100vh - 200px);
+      min-height: 250px;
+      padding: 0.5em;
       border-width: 2px;
+    }
+
+    .version {
+      margin-top: 0.75em;
+      font-size: 0.8em;
     }
 
     .message {
@@ -316,20 +323,36 @@
 
   @media (max-width: 480px) {
     main {
-      padding: 0.5rem;
+      padding: 0.25rem;
     }
 
     h1 {
-      font-size: 1.5em;
+      font-size: 1.4em;
+      margin-bottom: 0.25em;
     }
 
     .message-box {
-      height: calc(100vh - 200px);
-      padding: 0.5em;
+      height: calc(100vh - 180px);
+      padding: 0.4em;
+      border-width: 2px;
     }
 
     .header {
-      padding: 0.5em;
+      gap: 0.4em;
+      margin-bottom: 0.5em;
+    }
+
+    .status {
+      font-size: 0.9em;
+    }
+
+    .bmc-button {
+      height: 28px;
+    }
+
+    .version {
+      margin-top: 0.5em;
+      font-size: 0.75em;
     }
   }
 
