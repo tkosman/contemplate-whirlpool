@@ -1,7 +1,7 @@
 <script>
   import { onMount, onDestroy, afterUpdate } from 'svelte';
 
-  const APP_VERSION = '1.0.2';
+  const APP_VERSION = '1.0.12';
 
   let messages = [];
   let connected = false;
