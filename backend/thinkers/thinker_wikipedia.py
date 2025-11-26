@@ -206,13 +206,10 @@ class WikipediaThinker(Thinker):
                 return title_tokens[0]
 
             # ultimate fallback: generate a random common noun
-            if self.nlp:
-                common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
-                result = random.choice(common_nouns)
-                logger.debug(f"Generated random noun: {result}")
-                return result
-
-            return "none"
+            common_nouns = ["idea", "concept", "thought", "question", "answer", "theory", "subject", "topic", "matter", "issue"]
+            result = random.choice(common_nouns)
+            logger.debug(f"Generated random noun: {result}")
+            return result
 
 
 if __name__ == "__main__":
