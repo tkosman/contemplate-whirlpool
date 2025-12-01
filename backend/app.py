@@ -1,5 +1,6 @@
 import sanic
 import asyncio
+import json
 from sanic.log import logger
 from prometheus_client import Counter, CollectorRegistry, generate_latest
 from prometheus_client import CONTENT_TYPE_LATEST
@@ -13,9 +14,10 @@ app = sanic.Sanic("ContemplateWhirlpool")
 # Enable CORS
 app.config.CORS_ORIGINS = "*"
 
-hello_world_counter = Counter(
-    'hello_world_requests_total',
-    'Total number of requests to hello_world endpoint'
+word_occurrence_counter = Counter(
+    'thought_words_total',
+    'Total occurrences of each thought word',
+    ['word', 'thinker']
 )
 
 @app.before_server_start
@@ -28,14 +30,13 @@ async def setup_cave(app, loop):
 
 @app.get("/")
 async def hello_world(request):
-    hello_world_counter.inc()
     return sanic.response.text("Hello, World! v1.0.2")
 
 
 @app.get("/prometheus")
 async def prometheus_metrics(request):
     registry = CollectorRegistry()
-    registry.register(hello_world_counter)
+    registry.register(word_occurrence_counter)
 
     return sanic.response.raw(
         generate_latest(registry),
@@ -49,13 +50,19 @@ async def feed(request: Request, ws: Websocket):
         app.ctx.cave.wcs.append(ws)
         last_thought = ""
         while True:
-            async with app.ctx.cave.get_thought() as thought:
-                if thought != last_thought:
-                    await ws.send(thought)
-                    last_thought = thought
+            async with app.ctx.cave.get_thought() as thought_json:
+                if thought_json != last_thought:
+                    thought_data = json.loads(thought_json)
+                    word_occurrence_counter.labels(
+                        word=thought_data["thought"],
+                        thinker=thought_data["thinker"]
+                    ).inc()
+
+                    await ws.send(thought_json)
+                    last_thought = thought_json
             await asyncio.sleep(0.5)
-    except Exception:
-        logger.warning(f"WebSocket error with: {ws}")
+    except Exception as e:
+        logger.warning(f"WebSocket error with: {ws}, error: {e}")
     finally:
         logger.info(f"WebSocket disconnected: {ws}")
         app.ctx.cave.wcs.remove(ws)
