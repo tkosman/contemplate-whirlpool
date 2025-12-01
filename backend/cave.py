@@ -8,6 +8,7 @@ from sanic import Websocket
 from thinker import Thinker
 from thinkers.thinker_wikipedia import WikipediaThinker
 from thinkers.thinker_loc import LOCThinker
+from thinkers.thinker_openlibrary import OpenLibraryThinker
 
 
 class Cave:
@@ -43,4 +44,5 @@ if __name__ == "__main__":
     cave = Cave()
     cave.add_thinker(WikipediaThinker("WikipediaThinker"))
     cave.add_thinker(LOCThinker("LOCThinker"))
+    cave.add_thinker(OpenLibraryThinker("OpenLibraryThinker"))
     asyncio.run(cave.contemplate())
